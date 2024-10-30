@@ -54,17 +54,15 @@ function drawMatrix() {
     if (
         !initialFallDelay &&
         showingSpecial &&
-        Math.random() > (window.innerWidth < 900 ? 0.97 : 0.997) && 
+        Math.random() > (window.innerWidth < 900 ? 0.978 : 0.997) && 
         drops[i] * fontSize < (window.innerWidth < 900 ? canvas.height * 0.7 : canvas.height / 2)
       ) {
       text = specialWords[currentSpecialIndex];
       color = "#FFF";
       ctx.shadowColor = "#FFF";
-      ctx.shadowBlur = 10;
       specialDelays[i] = text.length * 15; // Delay for the length of the special word (increased duration)
     } else {
       text = matrix[Math.floor(Math.random() * matrix.length)];
-      ctx.shadowBlur = 0;
     }
 
     ctx.fillStyle = color;
