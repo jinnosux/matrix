@@ -54,7 +54,7 @@ function drawMatrix() {
     if (
         !initialFallDelay &&
         showingSpecial &&
-        Math.random() > (window.innerWidth < 900 ? 0.95 : 0.997) && 
+        Math.random() > (window.innerWidth < 900 ? 0.97 : 0.997) && 
         drops[i] * fontSize < (window.innerWidth < 900 ? canvas.height * 0.7 : canvas.height / 2)
       ) {
       text = specialWords[currentSpecialIndex];
