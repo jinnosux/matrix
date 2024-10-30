@@ -6,7 +6,7 @@ const tvOff = document.getElementById("tv-off");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 const matrix = letters.split("");
-let fontSize = window.innerWidth < 900 ? 14 : 17; 
+let fontSize = window.innerWidth < 900 ? 13 : 17; 
 let columns = Math.floor(canvas.width / fontSize);
 const drops = Array.from({ length: columns }).fill(1);
 const specialDelays = Array(columns).fill(0);
@@ -51,7 +51,12 @@ function drawMatrix() {
     let color = "#0F0";
 
     // Show special words in order after initial delay
-    if (!initialFallDelay && showingSpecial && Math.random() > (window.innerWidth < 768 ? 0.98 : 0.997) && drops[i] * fontSize < canvas.height / 2) {
+    if (
+        !initialFallDelay &&
+        showingSpecial &&
+        Math.random() > (window.innerWidth < 900 ? 0.95 : 0.997) && 
+        drops[i] * fontSize < (window.innerWidth < 900 ? canvas.height * 0.7 : canvas.height / 2)
+      ) {
       text = specialWords[currentSpecialIndex];
       color = "#FFF";
       ctx.shadowColor = "#FFF";
