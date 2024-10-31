@@ -24,7 +24,7 @@ fetch('https://ipapi.co/json/')
     .then(response => response.json())
     .then(data => {
         if (data.ip) {
-            appendNewLineInfo(`Your IP Address is ${data.ip}`);
+            appendNewLineInfo(`Your Public IP Address is ${data.ip}`);
         }
         if (data.city && data.region && data.country_name) {
             appendNewLineInfo(`You are located somewhere near ${data.city}, ${data.region}, ${data.country_name}`);
@@ -34,7 +34,7 @@ fetch('https://ipapi.co/json/')
         }
     })
     .catch(error => {
-        console.error('Error fetching IP data:', error);
+        console.error('hmm, there seems to be an error with ipapi.co');
     });
 
 // WebRTC Local IP Detection
@@ -48,12 +48,12 @@ function getLocalIPs() {
                 const ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3})/;
                 const ip = event.candidate.candidate.match(ipRegex);
                 if (ip) {
-                    appendNewLineInfo(`Local IP Address: ${ip[1]}`);
+                    appendNewLineInfo(`Your Local IP Address is ${ip[1]}`);
                 }
             }
         };
     } catch (e) {
-        console.error('Error detecting local IPs:', e);
+        console.error('hmm, there seems to be an error with WebRTC');
     }
 }
 getLocalIPs();
@@ -144,22 +144,35 @@ if (navigator.doNotTrack) {
     appendNewLineInfo(`Do Not Track is ${navigator.doNotTrack === "1" ? "enabled" : "disabled"}`);
 }
 
-function appendHumanReadableMotion(x, y, z) {
-    let motionMessage = "Device is ";
-    
-    // Interpret Z-axis movement as "still" or "moving"
-    if (Math.abs(z) < 0.5) {
-        motionMessage += "still or moving slowly.";
-    } else if (z < 0) {
-        motionMessage += "moving backward.";
+function trackDeviceOrientation() {
+    // Check if permissions are required and request them
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+            .then(permissionState => {
+                if (permissionState === 'granted') {
+                    addOrientationListener();
+                } else {
+                    console.log('Permission to access device orientation was denied.');
+                }
+            })
+            .catch(console.error);
     } else {
-        motionMessage += "moving forward.";
+        // Add listener directly if no explicit permission request is required
+        addOrientationListener();
     }
 
-    appendNewLineInfo(motionMessage);
+    function addOrientationListener() {
+        function handleDeviceOrientation(event) {
+            if (event.alpha !== null && event.beta !== null && event.gamma !== null) {
+                updateOrientationInfo(event.alpha, event.beta, event.gamma);
+            }
+        }
+        window.addEventListener('deviceorientation', handleDeviceOrientation);
+    }
 }
 
-function appendHumanReadableOrientation(alpha, beta, gamma) {
+// Update the orientation info in a specific <p> element
+function updateOrientationInfo(alpha, beta, gamma) {
     let orientationMessage = "Orientation: ";
     
     // Alpha is the device "facing direction"
@@ -187,36 +200,19 @@ function appendHumanReadableOrientation(alpha, beta, gamma) {
         orientationMessage += ", Tilted Left";
     }
 
-    appendNewLineInfo(orientationMessage);
+    // Update or create the <p> element with the orientation info
+    let orientationElement = document.getElementById('device-orientation-info');
+    if (!orientationElement) {
+        orientationElement = document.createElement('p');
+        orientationElement.id = 'device-orientation-info';
+        orientationElement.style.fontSize = `${fontSize}px`;
+        orientationElement.style.fontFamily = 'monospace';
+        document.getElementById('info-container').appendChild(orientationElement);
+    }
+    orientationElement.innerText = orientationMessage;
 }
 
-function trackDeviceMotion() {
-    let orientationCaptured = false;
-    let motionCaptured = false;
-
-    function handleDeviceOrientation(event) {
-        if (orientationCaptured) return;
-        
-        if (event.alpha !== null && event.beta !== null && event.gamma !== null) {
-            appendHumanReadableOrientation(event.alpha, event.beta, event.gamma);
-            orientationCaptured = true;
-            window.removeEventListener('deviceorientation', handleDeviceOrientation);
-        }
-    }
-
-    function handleDeviceMotion(event) {
-        if (motionCaptured) return;
-        
-        if (event.acceleration.x !== null && event.acceleration.y !== null && event.acceleration.z !== null) {
-            appendHumanReadableMotion(event.acceleration.x, event.acceleration.y, event.acceleration.z);
-            motionCaptured = true;
-            window.removeEventListener('devicemotion', handleDeviceMotion);
-        }
-    }
-
-    window.addEventListener('deviceorientation', handleDeviceOrientation);
-    window.addEventListener('devicemotion', handleDeviceMotion);
-}
+trackDeviceOrientation();
 
 // Battery Status
 function getBatteryStatus() {
@@ -227,7 +223,7 @@ function getBatteryStatus() {
                 appendNewLineInfo(`Battery level: ${batteryLevel.toFixed(0)}%, Charging: ${battery.charging ? 'Yes' : 'No'}`);
             }
         }).catch(error => {
-            console.error('Error getting battery status:', error);
+            console.error('hmm, there seems to be an error with battery stuff', error);
         });
     }
 }
