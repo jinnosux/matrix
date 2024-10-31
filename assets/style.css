@@ -7,6 +7,14 @@ body {
   color: white;
   font-family: "Courier New", Courier, monospace;
 }
+
+body.client-info {
+    background-color: black;
+    color: #0F0;
+    font-size: 17px;
+    font-family: "Courier New", Courier, monospace;
+}
+
 canvas {
   position: absolute;
   top: 0;

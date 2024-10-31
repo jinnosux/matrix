@@ -20,7 +20,7 @@ console.log("Why are you here?");
 setTimeout(() => {
   initialFallDelay = false;
   showNextSpecialWord();
-}, 3000); // 3-second delay
+}, 2000); // 2-second delay
 
 function showNextSpecialWord() {
   if (currentSpecialIndex >= specialWords.length) {
@@ -32,52 +32,73 @@ function showNextSpecialWord() {
     showingSpecial = false;
     currentSpecialIndex++;
     showNextSpecialWord();
-  }, 4000); // Show each special word for 4 seconds
+  }, 3500); // Show each special word for 3.5 seconds
 }
 
 function drawMatrix() {
-  ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.font = fontSize + "px monospace";
-
-  for (let i = 0; i < drops.length; i++) {
-    if (specialDelays[i] > 0) {
-      specialDelays[i]--;
-      continue;
-    }
-
-    let text;
-    let color = "#0F0";
-
-    // Show special words in order after initial delay
-    if (
-        !initialFallDelay &&
-        showingSpecial &&
-        Math.random() > (window.innerWidth < 900 ? 0.978 : 0.997) && 
-        drops[i] * fontSize < (window.innerWidth < 900 ? canvas.height * 0.7 : canvas.height / 2)
+    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+    ctx.font = fontSize + "px monospace";
+  
+    for (let i = 0; i < drops.length; i++) {
+      if (specialDelays[i] > 0) {
+        specialDelays[i]--;
+        continue;
+      }
+  
+      let text;
+      let color = "#0F0";
+      let wordObj = null;
+  
+      // Show special words in order after initial delay
+      if (
+          !initialFallDelay &&
+          showingSpecial &&
+          Math.random() > (window.innerWidth < 900 ? 0.978 : 0.997) &&
+          drops[i] * fontSize < (window.innerWidth < 900 ? canvas.height * 0.7 : canvas.height / 2)
       ) {
-      text = specialWords[currentSpecialIndex];
-      color = "#FFF";
-      ctx.shadowColor = "#FFF";
-      specialDelays[i] = text.length * 15; // Delay for the length of the special word (increased duration)
-    } else {
-      text = matrix[Math.floor(Math.random() * matrix.length)];
+        wordObj = specialWords[currentSpecialIndex];
+        text = wordObj.text;
+        color = "#FFF";
+        ctx.shadowColor = "#FFF";
+        specialDelays[i] = text.length * 15; // Delay for the length of the special word (increased duration)
+      } else {
+        text = matrix[Math.floor(Math.random() * matrix.length)];
+      }
+  
+      ctx.fillStyle = color;
+      for (let j = 0; j < text.length; j++) {
+        ctx.fillText(text[j], i * fontSize, (drops[i] + j) * fontSize);
+      }
+  
+      // Add event listener for click on special words
+      if (wordObj && wordObj.url) {
+        const x = i * fontSize;
+        const yStart = drops[i] * fontSize;
+        const yEnd = yStart + text.length * fontSize;
+  
+        canvas.addEventListener('click', function(event) {
+          if (
+            event.clientX > x - fontSize / 2 &&
+            event.clientX < x + fontSize * 1.5 &&
+            event.clientY > yStart - fontSize / 2 &&
+            event.clientY < yEnd + fontSize / 2
+          ) {
+            window.open(wordObj.url, '_blank');
+          }
+        });
+      }
+  
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+  
+      drops[i]++;
     }
-
-    ctx.fillStyle = color;
-    for (let j = 0; j < text.length; j++) {
-      ctx.fillText(text[j], i * fontSize, (drops[i] + j) * fontSize);
-    }
-
-    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-      drops[i] = 0;
-    }
-
-    drops[i]++;
   }
-}
-setInterval(drawMatrix, 50);
+  setInterval(drawMatrix, 50);
+  
 
 // Zooming in Effect
 let scale = 1;
@@ -112,6 +133,18 @@ function endSequence() {
     setTimeout(() => {
       gif.style.display = "none";
       tvOff.style.display = "block";
+
+      // the end
+      const message = document.createElement("div");
+      message.innerText = "You have taken the blue pill. Reality awaits.";
+      message.style.position = "absolute";
+      message.style.top = "50%";
+      message.style.left = "50%";
+      message.style.transform = "translate(-50%, -50%)";
+      message.style.color = "#FFF";
+      message.style.fontSize = "2rem";
+      message.style.textAlign = "center";
+      tvOff.appendChild(message);
     }, 1000);
   }, 1000);
 }
