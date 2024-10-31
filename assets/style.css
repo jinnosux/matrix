@@ -4,7 +4,7 @@ body {
   font-family: "Courier New", Courier, monospace;
 }
 
-body.matrix{
+body.matrix {
     overflow: hidden;
     position: fixed;
     width: 100%;

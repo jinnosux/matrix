@@ -6,7 +6,6 @@ const tvOff = document.getElementById("tv-off");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 const matrix = letters.split("");
-let fontSize = window.innerWidth < 900 ? 13 : 17; 
 let columns = Math.floor(canvas.width / fontSize);
 const drops = Array.from({ length: columns }).fill(1);
 const specialDelays = Array(columns).fill(0);
