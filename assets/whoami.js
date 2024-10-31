@@ -2,6 +2,8 @@ function appendInfo(message) {
     const container = document.getElementById('info-container');
     const paragraph = document.getElementById('combined-info') || document.createElement('p');
     paragraph.id = 'combined-info';
+    paragraph.style.fontSize = `${fontSize}px`;
+    paragraph.style.fontFamily = 'monospace';
     paragraph.innerText = paragraph.innerText ? paragraph.innerText + ", " + message : message;
     container.appendChild(paragraph);
 }
@@ -10,6 +12,8 @@ function appendNewLineInfo(message) {
     if (message) {
         const container = document.getElementById('info-container');
         const paragraph = document.createElement('p');
+        paragraph.style.fontSize = `${fontSize}px`;
+        paragraph.style.fontFamily = 'monospace';
         paragraph.innerText = message;
         container.appendChild(paragraph);
     }

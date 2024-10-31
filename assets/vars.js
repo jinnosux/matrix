@@ -29,3 +29,5 @@ const specialWords = [
         url: null
     },
 ];
+
+let fontSize = window.innerWidth < 900 ? 13 : 17; 

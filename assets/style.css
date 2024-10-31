@@ -1,18 +1,18 @@
 body {
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
-  height: 100%;
   background-color: black;
   color: white;
   font-family: "Courier New", Courier, monospace;
 }
 
-body.client-info {
-    background-color: black;
+body.matrix{
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+body.whoami {
     color: #0F0;
-    font-size: 17px;
-    font-family: "Courier New", Courier, monospace;
 }
 
 canvas {
