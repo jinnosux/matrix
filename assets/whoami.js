@@ -63,10 +63,12 @@ if (window.screen.width && window.screen.height) {
     appendNewLineInfo(`Your browser resolution is ${window.screen.width} x ${window.screen.height}`);
 }
 
-// Extract and display browser name from user agent
+// Extract and display browser name and operating system from user agent
 const userAgent = navigator.userAgent;
 let browserName = "Unknown";
 let osName = "Unknown";
+
+// Browser detection
 if (userAgent.includes("Chrome")) {
     browserName = "Chrome";
 } else if (userAgent.includes("Firefox")) {
@@ -78,7 +80,11 @@ if (userAgent.includes("Chrome")) {
 } else if (userAgent.includes("Trident")) {
     browserName = "Internet Explorer";
 }
-if (userAgent.includes("Windows NT")) {
+
+// OS detection, with specific check for Android before Linux
+if (userAgent.includes("Android")) {
+    osName = "Android";
+} else if (userAgent.includes("Windows NT")) {
     osName = "Windows";
 } else if (userAgent.includes("Mac OS")) {
     osName = "MacOS";
@@ -87,12 +93,14 @@ if (userAgent.includes("Windows NT")) {
 } else if (userAgent.includes("Linux")) {
     osName = "Linux";
 }
+
 if (browserName !== "Unknown") {
     appendInfo(`You're using ${browserName}`);
 }
 if (osName !== "Unknown") {
     appendNewLineInfo(`Your operating system is ${osName}`);
 }
+
 
 // Display cookies status
 if (navigator.cookieEnabled) {
@@ -136,24 +144,79 @@ if (navigator.doNotTrack) {
     appendNewLineInfo(`Do Not Track is ${navigator.doNotTrack === "1" ? "enabled" : "disabled"}`);
 }
 
-// Device Motion and Orientation
-function trackDeviceMotion() {
-    window.addEventListener('deviceorientation', event => {
-        if (event && event.alpha !== null && event.beta !== null && event.gamma !== null && (event.alpha !== 0.0 || event.beta !== 0.0 || event.gamma !== 0.0)) {
-            appendNewLineInfo(`Device orientation - alpha: ${event.alpha}, beta: ${event.beta}, gamma: ${event.gamma}`);
-            if (event.beta > 0) {
-                appendNewLineInfo(`Orientation: horizontal/landscape`);
-            }
-        }
-    });
+function appendHumanReadableMotion(x, y, z) {
+    let motionMessage = "Device is ";
+    
+    // Interpret Z-axis movement as "still" or "moving"
+    if (Math.abs(z) < 0.5) {
+        motionMessage += "still or moving slowly.";
+    } else if (z < 0) {
+        motionMessage += "moving backward.";
+    } else {
+        motionMessage += "moving forward.";
+    }
 
-    window.addEventListener('devicemotion', event => {
-        if (event && event.acceleration && event.acceleration.x !== null && event.acceleration.y !== null && event.acceleration.z !== null && (event.acceleration.x !== 0.0 || event.acceleration.y !== 0.0 || event.acceleration.z !== 0.0)) {
-            appendNewLineInfo(`Device motion - X: ${event.acceleration.x}, Y: ${event.acceleration.y}, Z: ${event.acceleration.z}`);
-        }
-    });
+    appendNewLineInfo(motionMessage);
 }
-trackDeviceMotion();
+
+function appendHumanReadableOrientation(alpha, beta, gamma) {
+    let orientationMessage = "Orientation: ";
+    
+    // Alpha is the device "facing direction"
+    if (alpha >= 0 && alpha <= 45 || alpha >= 315 && alpha <= 360) {
+        orientationMessage += "Facing North";
+    } else if (alpha > 45 && alpha <= 135) {
+        orientationMessage += "Facing East";
+    } else if (alpha > 135 && alpha <= 225) {
+        orientationMessage += "Facing South";
+    } else if (alpha > 225 && alpha <= 315) {
+        orientationMessage += "Facing West";
+    }
+
+    // Beta indicates forward/backward tilt
+    if (beta > 45) {
+        orientationMessage += ", Tilted Forward";
+    } else if (beta < -45) {
+        orientationMessage += ", Tilted Backward";
+    }
+
+    // Gamma indicates left/right tilt
+    if (gamma > 30) {
+        orientationMessage += ", Tilted Right";
+    } else if (gamma < -30) {
+        orientationMessage += ", Tilted Left";
+    }
+
+    appendNewLineInfo(orientationMessage);
+}
+
+function trackDeviceMotion() {
+    let orientationCaptured = false;
+    let motionCaptured = false;
+
+    function handleDeviceOrientation(event) {
+        if (orientationCaptured) return;
+        
+        if (event.alpha !== null && event.beta !== null && event.gamma !== null) {
+            appendHumanReadableOrientation(event.alpha, event.beta, event.gamma);
+            orientationCaptured = true;
+            window.removeEventListener('deviceorientation', handleDeviceOrientation);
+        }
+    }
+
+    function handleDeviceMotion(event) {
+        if (motionCaptured) return;
+        
+        if (event.acceleration.x !== null && event.acceleration.y !== null && event.acceleration.z !== null) {
+            appendHumanReadableMotion(event.acceleration.x, event.acceleration.y, event.acceleration.z);
+            motionCaptured = true;
+            window.removeEventListener('devicemotion', handleDeviceMotion);
+        }
+    }
+
+    window.addEventListener('deviceorientation', handleDeviceOrientation);
+    window.addEventListener('devicemotion', handleDeviceMotion);
+}
 
 // Battery Status
 function getBatteryStatus() {
